@@ -2,14 +2,8 @@
 
 import { useMemo, useState } from "react";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle
-} from "@/components/ui/card";
-import { Task } from "@/lib/types";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Task, TaskUpdateInput } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 import { TaskItem } from "./TaskItem";
@@ -26,7 +20,7 @@ type Props = {
     completed: boolean,
     optimistic?: Task[]
   ) => Promise<void>;
-  onUpdate: (taskId: number, payload: Partial<Task>) => Promise<void>;
+  onUpdate: (taskId: number, payload: TaskUpdateInput) => Promise<void>;
   categories: string[];
 };
 

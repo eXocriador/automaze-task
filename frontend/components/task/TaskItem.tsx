@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select } from "@/components/ui/select";
-import { Task } from "@/lib/types";
+import { Task, TaskUpdateInput } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 function formatDate(value?: string | null): string | null {
@@ -18,7 +18,7 @@ type Props = {
   task: Task;
   onToggle: (task: Task) => Promise<void>;
   onDelete: (task: Task) => Promise<void>;
-  onUpdate: (taskId: number, payload: Partial<Task>) => Promise<void>;
+  onUpdate: (taskId: number, payload: TaskUpdateInput) => Promise<void>;
   categories: string[];
   draggable?: boolean;
   onDragStart?: () => void;
@@ -81,7 +81,7 @@ export function TaskItem({
             />
             <Select
               value={task.category ?? ""}
-              onChange={(v) => onUpdate(task.id, { category: v || null })}
+              onChange={(v) => onUpdate(task.id, { category: v || undefined })}
               options={[{ label: "No category", value: "" }, ...categories.map((c) => ({ label: c, value: c }))]}
               className="w-32"
             />

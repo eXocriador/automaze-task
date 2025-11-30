@@ -22,7 +22,13 @@ import {
   updateTask,
   reorderTasks
 } from "@/lib/api";
-import { Task, TaskCreateInput, TaskSort, TaskStatus } from "@/lib/types";
+import {
+  Task,
+  TaskCreateInput,
+  TaskSort,
+  TaskStatus,
+  TaskUpdateInput
+} from "@/lib/types";
 import { TaskFilters } from "@/components/filters/TaskFilters";
 
 const categoryOptions = ["Work", "Personal", "Home", "Study"];
@@ -163,16 +169,30 @@ export default function HomePage() {
     );
   };
 
-  const handleUpdate = async (taskId: number, payload: Partial<Task>) => {
+  const sanitizePayload = (payload: TaskUpdateInput): TaskUpdateInput => {
+    const next: TaskUpdateInput = {};
+    if (payload.title !== undefined) next.title = payload.title;
+    if (payload.description !== undefined)
+      next.description = payload.description ?? undefined;
+    if (payload.completed !== undefined) next.completed = payload.completed;
+    if (payload.priority !== undefined) next.priority = payload.priority;
+    if (payload.category !== undefined)
+      next.category = payload.category ?? undefined;
+    if (payload.due_date !== undefined) next.due_date = payload.due_date ?? undefined;
+    return next;
+  };
+
+  const handleUpdate = async (taskId: number, payload: TaskUpdateInput) => {
+    const updatePayload = sanitizePayload(payload);
     await mutate(
       async () => {
-        const updated = await updateTask(taskId, payload);
+        const updated = await updateTask(taskId, updatePayload);
         if (!tasks) return [updated];
         return tasks.map((t) => (t.id === taskId ? updated : t));
       },
       {
         optimisticData: tasks?.map((t) =>
-          t.id === taskId ? { ...t, ...payload } : t
+          t.id === taskId ? { ...t, ...updatePayload } : t
         ),
         rollbackOnError: true,
         revalidate: true,
