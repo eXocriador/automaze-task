@@ -17,7 +17,7 @@ export function TaskList({ tasks, isLoading, onToggle, onDelete }: Props) {
     return (
       <Card>
         <CardContent className="p-4 text-sm text-slate-600">
-          Завантаження задач...
+          Loading tasks...
         </CardContent>
       </Card>
     );
@@ -27,7 +27,7 @@ export function TaskList({ tasks, isLoading, onToggle, onDelete }: Props) {
     return (
       <Card>
         <CardContent className="p-4 text-sm text-slate-600">
-          Поки що задач немає. Додай першу!
+          No tasks yet. Add your first one!
         </CardContent>
       </Card>
     );

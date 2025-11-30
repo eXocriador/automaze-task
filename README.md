@@ -49,7 +49,7 @@ cp .env.example .env  # adjust as needed
 # or
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000 --app-dir .
 ```
-Default DB lives at `backend/app/app.db` (SQLite). Change `DATABASE_URL` in `.env` for Postgres/MySQL, etc.
+Default DB lives at `backend/app/app.db` (SQLite). If you override `DATABASE_URL`, keep it relative to `backend/`, e.g. `sqlite:///./app/app.db`. For Postgres/MySQL set a full URL.
 
 ## Frontend Setup
 Prereqs: Node 18+ and npm.

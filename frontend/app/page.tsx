@@ -20,9 +20,9 @@ import { cn } from "@/lib/utils";
 
 const statusOptions: TaskStatus[] = ["all", "done", "undone"];
 const sortOptions: { value: TaskSort; label: string }[] = [
-  { value: null, label: "Нові зверху" },
-  { value: "priority_desc", label: "Пріоритет ↓" },
-  { value: "priority_asc", label: "Пріоритет ↑" }
+  { value: null, label: "Newest first" },
+  { value: "priority_desc", label: "Priority ↓" },
+  { value: "priority_asc", label: "Priority ↑" }
 ];
 
 export default function HomePage() {
@@ -114,17 +114,17 @@ export default function HomePage() {
           <Card className="bg-gradient-to-r from-white to-slate-50">
             <CardHeader className="gap-2">
               <CardTitle className="text-3xl font-semibold text-slate-900">
-                Список задач
+                Task list
               </CardTitle>
               <CardDescription>
-                Next.js App Router + FastAPI через проксі /api/tasks
+                Next.js App Router + FastAPI via /api/tasks proxy
               </CardDescription>
               <div className="flex flex-wrap items-center gap-2">
                 <Badge variant={isValidating ? "warning" : "success"}>
-                  {isValidating ? "Оновлення..." : "Синхронізовано"}
+                  {isValidating ? "Refreshing..." : "Synced"}
                 </Badge>
                 <Badge variant="secondary">
-                  {doneCount} / {total} виконано
+                  {doneCount} / {total} done
                 </Badge>
               </div>
             </CardHeader>
@@ -142,17 +142,17 @@ export default function HomePage() {
                     onClick={() => setStatus(option)}
                   >
                     {option === "all"
-                      ? "Усі"
+                      ? "All"
                       : option === "done"
-                      ? "Виконані"
-                      : "Невиконані"}
+                      ? "Done"
+                      : "Undone"}
                   </Button>
                 ))}
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 <input
                   type="text"
-                  placeholder="Пошук..."
+                  placeholder="Search..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="w-full min-w-[200px] rounded-md border border-slate-200 px-3 py-2 text-sm outline-none ring-offset-2 focus:border-slate-400 focus:ring-2 focus:ring-slate-200 sm:w-64"

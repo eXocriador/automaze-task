@@ -19,9 +19,9 @@ SortOption = Literal["priority_asc", "priority_desc"]
     summary="List tasks with search, filter, and sort",
 )
 def list_tasks(
-    search: Annotated[Optional[str], Query(None, min_length=1, max_length=255)] = None,
-    status: Annotated[Optional[StatusFilter], Query(None)] = None,
-    sort: Annotated[Optional[SortOption], Query(None)] = None,
+    search: Annotated[Optional[str], Query(min_length=1, max_length=255)] = None,
+    status: Annotated[Optional[StatusFilter], Query()] = None,
+    sort: Annotated[Optional[SortOption], Query()] = None,
     db: Session = Depends(get_db),
 ) -> List[schemas.Task]:
     normalized_status = None if status in (None, "all") else status

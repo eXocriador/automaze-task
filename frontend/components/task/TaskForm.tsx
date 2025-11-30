@@ -33,7 +33,7 @@ export function TaskForm({ onSubmit }: Props) {
       setDescription("");
       setPriority(5);
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Не вдалося створити задачу";
+      const message = err instanceof Error ? err.message : "Failed to create task";
       setError(message);
     } finally {
       setLoading(false);
@@ -43,15 +43,15 @@ export function TaskForm({ onSubmit }: Props) {
   return (
     <Card>
       <CardHeader className="pb-4">
-        <CardTitle className="text-lg">Додати нову задачу</CardTitle>
+        <CardTitle className="text-lg">Add a new task</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="text-sm font-medium text-slate-700">Назва</label>
+            <label className="text-sm font-medium text-slate-700">Title</label>
             <input
               className="mt-1 w-full rounded-md border border-slate-200 px-3 py-2 text-sm outline-none ring-offset-2 focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
-              placeholder="Напр. Купити молоко"
+              placeholder="e.g. Buy milk"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               required
@@ -59,17 +59,17 @@ export function TaskForm({ onSubmit }: Props) {
             />
           </div>
           <div>
-            <label className="text-sm font-medium text-slate-700">Опис</label>
+            <label className="text-sm font-medium text-slate-700">Description</label>
             <textarea
               className="mt-1 w-full rounded-md border border-slate-200 px-3 py-2 text-sm outline-none ring-offset-2 focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
-              placeholder="Деталі задачі (необов'язково)"
+              placeholder="Task details (optional)"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={2}
             />
           </div>
           <div className="flex items-center gap-3">
-            <label className="text-sm font-medium text-slate-700">Пріоритет</label>
+            <label className="text-sm font-medium text-slate-700">Priority</label>
             <input
               type="number"
               min={1}
@@ -78,12 +78,12 @@ export function TaskForm({ onSubmit }: Props) {
               onChange={(e) => setPriority(Number(e.target.value))}
               className="w-24 rounded-md border border-slate-200 px-3 py-2 text-sm outline-none ring-offset-2 focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
             />
-            <span className="text-xs text-slate-500">1 — низький, 10 — найвищий</span>
+            <span className="text-xs text-slate-500">1 — lowest, 10 — highest</span>
           </div>
           {error ? <p className="text-sm text-red-600">{error}</p> : null}
           <div className="flex justify-end">
             <Button type="submit" disabled={loading}>
-              {loading ? "Створюємо..." : "Додати задачу"}
+              {loading ? "Creating..." : "Add task"}
             </Button>
           </div>
         </form>

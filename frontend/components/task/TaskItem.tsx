@@ -23,7 +23,7 @@ export function TaskItem({ task, onToggle, onDelete }: Props) {
               checked={task.completed}
               onChange={() => onToggle(task)}
               className="mt-1 h-4 w-4 accent-slate-800"
-              aria-label="Позначити виконаною"
+              aria-label="Mark as completed"
             />
             <div>
               <p
@@ -40,18 +40,18 @@ export function TaskItem({ task, onToggle, onDelete }: Props) {
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="secondary">Пріоритет: {task.priority}</Badge>
+            <Badge variant="secondary">Priority: {task.priority}</Badge>
             <Badge variant={task.completed ? "success" : "warning"}>
-              {task.completed ? "Виконано" : "В процесі"}
+              {task.completed ? "Completed" : "In progress"}
             </Badge>
           </div>
         </div>
         <div className="flex flex-col gap-2 sm:flex-row">
           <Button variant="secondary" onClick={() => onToggle(task)}>
-            {task.completed ? "Повернути" : "Готово"}
+            {task.completed ? "Reopen" : "Done"}
           </Button>
           <Button variant="destructive" onClick={() => onDelete(task)}>
-            Видалити
+            Delete
           </Button>
         </div>
       </CardContent>
