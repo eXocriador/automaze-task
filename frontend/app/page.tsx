@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useMemo, useState } from "react";
 import useSWR from "swr";
@@ -14,17 +14,19 @@ import {
   CardHeader,
   CardTitle
 } from "@/components/ui/card";
+import { Modal } from "@/components/ui/modal";
+import { Select } from "@/components/ui/select";
 import {
   createTask,
   deleteTask,
   fetchTasks,
-  reorderTasks,
-  updateTask
+  updateTask,
+  reorderTasks
 } from "@/lib/api";
 import { Task, TaskCreateInput, TaskSort, TaskStatus } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-const statusOptions: TaskStatus[] = ["all", "done", "undone"];
+const categoryOptions = ["Work", "Personal", "Home", "Study"];
 const sortOptions: { value: TaskSort; label: string }[] = [
   { value: null, label: "Newest first" },
   { value: "priority_desc", label: "Priority ↓" },
@@ -35,11 +37,17 @@ const sortOptions: { value: TaskSort; label: string }[] = [
 
 export default function HomePage() {
   const [search, setSearch] = useState("");
-  const [status, setStatus] = useState<TaskStatus>("all");
+  const status: TaskStatus = "all";
   const [sort, setSort] = useState<TaskSort>(null);
   const [category, setCategory] = useState<string>("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const { data: tasks, isLoading, mutate, isValidating } = useSWR(
+  const {
+    data: tasks,
+    isLoading,
+    mutate,
+    isValidating
+  } = useSWR(
     ["tasks", search, status, sort, category],
     () =>
       fetchTasks({
@@ -82,6 +90,7 @@ export default function HomePage() {
         populateCache: true
       }
     );
+    setIsModalOpen(false);
   };
 
   const handleToggle = async (task: Task) => {
@@ -134,22 +143,63 @@ export default function HomePage() {
     );
   };
 
+  const handleMove = async (
+    orderIds: number[],
+    movedTaskId: number,
+    completed: boolean,
+    optimistic?: Task[]
+  ) => {
+    await mutate(
+      async () => {
+        await updateTask(movedTaskId, { completed });
+        const updated = await reorderTasks(orderIds);
+        return updated;
+      },
+      {
+        optimisticData: optimistic ?? tasks,
+        rollbackOnError: true,
+        revalidate: true,
+        populateCache: true
+      }
+    );
+  };
+
+  const handleUpdate = async (taskId: number, payload: Partial<Task>) => {
+    await mutate(
+      async () => {
+        const updated = await updateTask(taskId, payload);
+        if (!tasks) return [updated];
+        return tasks.map((t) => (t.id === taskId ? updated : t));
+      },
+      {
+        optimisticData: tasks?.map((t) =>
+          t.id === taskId ? { ...t, ...payload } : t
+        ),
+        rollbackOnError: true,
+        revalidate: true,
+        populateCache: true
+      }
+    );
+  };
+
   return (
     <main className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100">
       <div className="container py-12">
         <div className="mx-auto flex max-w-[800px] flex-col gap-8">
           <Card className="bg-gradient-to-r from-white to-slate-50">
-            <CardHeader className="gap-2">
-              <CardTitle className="text-3xl font-semibold text-slate-900">
-                Task list
-              </CardTitle>
-              <CardDescription>
-                Next.js App Router + FastAPI via /api/tasks proxy
-              </CardDescription>
-              <div className="flex flex-wrap items-center gap-2">
+            <CardHeader className="gap-3 pb-5">
+              <div className="flex items-start justify-between">
+                <CardTitle className="text-3xl font-semibold text-slate-900">
+                  Task manager
+                </CardTitle>
                 <Badge variant={isValidating ? "warning" : "success"}>
-                  {isValidating ? "Refreshing..." : "Synced"}
+                  {isValidating ? "Refreshing" : "Synced"}
                 </Badge>
+              </div>
+              <div className="flex items-center justify-between">
+                <CardDescription className="text-base text-slate-600">
+                  Next.js + FastAPI + SQLite
+                </CardDescription>
                 <Badge variant="secondary">
                   {doneCount} / {total} done
                 </Badge>
@@ -157,57 +207,50 @@ export default function HomePage() {
             </CardHeader>
           </Card>
 
-          <TaskForm onSubmit={handleCreate} />
+          <Card>
+            <CardContent className="flex items-center justify-between p-5">
+              <div>
+                <p className="text-sm font-semibold text-slate-900">
+                  Add new task
+                </p>
+                <p className="text-xs text-slate-500">
+                  Category & due date are optional; priority 1–10.
+                </p>
+              </div>
+              <Button onClick={() => setIsModalOpen(true)}>Add task</Button>
+            </CardContent>
+          </Card>
 
           <Card>
-            <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex flex-wrap items-center gap-2">
-                {statusOptions.map((option) => (
-                  <Button
-                    key={option}
-                    variant={status === option ? "primary" : "secondary"}
-                    onClick={() => setStatus(option)}
-                  >
-                    {option === "all"
-                      ? "All"
-                      : option === "done"
-                      ? "Done"
-                      : "Undone"}
-                  </Button>
-                ))}
-              </div>
-              <div className="flex flex-wrap items-center gap-2">
+            <CardContent className="p-5">
+              <div className="flex flex-col gap-3 md:flex-row md:items-center md:gap-4">
                 <input
                   type="text"
                   placeholder="Search..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="w-full min-w-[200px] rounded-md border border-slate-200 px-3 py-2 text-sm outline-none ring-offset-2 focus:border-slate-400 focus:ring-2 focus:ring-slate-200 sm:w-64"
+                  className="flex-1 rounded-md border border-slate-200 px-3 py-2 text-sm outline-none transition focus:border-slate-400 hover:border-slate-300"
                 />
-                <input
-                  type="text"
-                  placeholder="Category..."
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  className="w-full min-w-[160px] rounded-md border border-slate-200 px-3 py-2 text-sm outline-none ring-offset-2 focus:border-slate-400 focus:ring-2 focus:ring-slate-200 sm:w-52"
-                />
-                <select
-                  value={sort ?? ""}
-                  onChange={(e) =>
-                    setSort(
-                      e.target.value === ""
-                        ? null
-                        : (e.target.value as TaskSort)
-                    )
-                  }
-                  className="rounded-md border border-slate-200 px-3 py-2 text-sm outline-none ring-offset-2 focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
-                >
-                  {sortOptions.map((option) => (
-                    <option key={option.label} value={option.value ?? ""}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
+                <div className="flex w-full max-w-[480px] flex-none justify-end gap-3 md:w-auto">
+                  <Select
+                    value={category}
+                    onChange={(v) => setCategory(v)}
+                    options={[
+                      { label: "All categories", value: "" },
+                      ...categoryOptions.map((c) => ({ label: c, value: c }))
+                    ]}
+                    className="w-1/2"
+                  />
+                  <Select
+                    value={sort ?? ""}
+                    onChange={(v) => setSort(v === "" ? null : (v as TaskSort))}
+                    options={sortOptions.map((o) => ({
+                      label: o.label,
+                      value: o.value ?? ""
+                    }))}
+                    className="w-1/2"
+                  />
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -218,9 +261,19 @@ export default function HomePage() {
             onToggle={handleToggle}
             onDelete={handleDelete}
             onReorder={handleReorder}
+            onMove={handleMove}
+            onUpdate={handleUpdate}
+            categories={categoryOptions}
           />
         </div>
       </div>
+      <Modal
+        open={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title="Add a new task"
+      >
+        <TaskForm onSubmit={handleCreate} categories={categoryOptions} />
+      </Modal>
     </main>
   );
 }

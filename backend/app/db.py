@@ -41,6 +41,8 @@ def ensure_sqlite_columns(engine: Engine) -> None:
             to_add.append("ALTER TABLE tasks ADD COLUMN category VARCHAR(100)")
         if "due_date" not in columns:
             to_add.append("ALTER TABLE tasks ADD COLUMN due_date DATETIME")
+        if "order_index" not in columns:
+            to_add.append("ALTER TABLE tasks ADD COLUMN order_index INTEGER")
 
         for ddl in to_add:
             conn.execute(text(ddl))

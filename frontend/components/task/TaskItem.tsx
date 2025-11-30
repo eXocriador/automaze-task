@@ -17,20 +17,28 @@ type Props = {
   task: Task;
   onToggle: (task: Task) => Promise<void>;
   onDelete: (task: Task) => Promise<void>;
+  onUpdate: (taskId: number, payload: Partial<Task>) => Promise<void>;
+  categories: string[];
   draggable?: boolean;
   onDragStart?: () => void;
   onDragOver?: (e: React.DragEvent<HTMLDivElement>) => void;
   onDrop?: () => void;
+  isDragging?: boolean;
+  dimmed?: boolean;
 };
 
 export function TaskItem({
   task,
   onToggle,
   onDelete,
+  onUpdate,
+  categories,
   draggable = false,
   onDragStart,
   onDragOver,
-  onDrop
+  onDrop,
+  isDragging = false,
+  dimmed = false
 }: Props) {
   return (
     <Card
@@ -38,50 +46,66 @@ export function TaskItem({
       onDragStart={onDragStart}
       onDragOver={onDragOver}
       onDrop={onDrop}
-      className={draggable ? "cursor-move" : undefined}
+      className={cn(
+        "transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md",
+        dimmed ? "opacity-50" : "",
+        draggable && "cursor-grab active:cursor-grabbing",
+        isDragging && "cursor-grabbing"
+      )}
     >
       <CardContent className="flex items-start gap-3 p-4">
         <div className="flex flex-1 flex-col gap-2">
-          <div className="flex items-start gap-2">
-            <input
-              type="checkbox"
-              checked={task.completed}
-              onChange={() => onToggle(task)}
-              className="mt-1 h-4 w-4 accent-slate-800"
-              aria-label="Mark as completed"
-            />
-            <div>
-              <p
-                className={cn(
-                  "text-base font-semibold text-slate-900",
-                  task.completed && "line-through text-slate-500"
-                )}
-              >
-                {task.title}
-              </p>
-              {task.description ? (
-                <p className="text-sm text-slate-600">{task.description}</p>
-              ) : null}
-            </div>
+          <div>
+            <p
+              className={cn(
+                "text-base font-semibold text-slate-900",
+                task.completed && "line-through text-slate-500"
+              )}
+            >
+              {task.title}
+            </p>
+            {task.description ? (
+              <p className="text-sm text-slate-600">{task.description}</p>
+            ) : null}
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="secondary">Priority: {task.priority}</Badge>
-            <Badge variant={task.completed ? "success" : "warning"}>
-              {task.completed ? "Completed" : "In progress"}
-            </Badge>
-            {task.category ? (
-              <Badge variant="outline">Category: {task.category}</Badge>
-            ) : null}
+            <select
+              value={task.priority}
+              onChange={(e) => onUpdate(task.id, { priority: Number(e.target.value) })}
+              className="rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-700 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200 cursor-pointer"
+            >
+              {Array.from({ length: 10 }, (_, i) => i + 1).map((p) => (
+                <option key={p} value={p}>
+                  Priority: {p}
+                </option>
+              ))}
+            </select>
+            <select
+              value={task.category ?? ""}
+              onChange={(e) => onUpdate(task.id, { category: e.target.value || null })}
+              className="rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-700 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200 cursor-pointer"
+            >
+              <option value="">No category</option>
+              {categories.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
             {formatDate(task.due_date) ? (
               <Badge variant="secondary">Due: {formatDate(task.due_date)}</Badge>
             ) : null}
           </div>
         </div>
-        <div className="flex flex-col gap-2 sm:flex-row">
+        <div className="flex flex-col gap-2 self-end">
           <Button variant="secondary" onClick={() => onToggle(task)}>
             {task.completed ? "Reopen" : "Done"}
           </Button>
-          <Button variant="destructive" onClick={() => onDelete(task)}>
+          <Button
+            variant="destructive"
+            onClick={() => onDelete(task)}
+            className="mt-auto"
+          >
             Delete
           </Button>
         </div>

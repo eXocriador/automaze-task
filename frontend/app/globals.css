@@ -3,6 +3,23 @@
 @tailwind utilities;
 
 :root {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+select {
+  @apply appearance-none bg-white text-slate-900;
+}
+
+.select-shell {
+  @apply relative inline-flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm transition hover:border-slate-300 focus-within:border-slate-400 focus-within:ring-2 focus-within:ring-slate-200;
+}
+
+.select-shell::after {
+  content: "⌄";
+  @apply text-slate-500 pointer-events-none text-xs;
+}
+:root {
   --background: 0 0% 100%;
   --foreground: 222.2 84% 4.9%;
   --card: 0 0% 100%;
