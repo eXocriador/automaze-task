@@ -1,5 +1,6 @@
 'use client';
 
+import { Card, CardContent } from "@/components/ui/card";
 import { Task } from "@/lib/types";
 
 import { TaskItem } from "./TaskItem";
@@ -14,17 +15,21 @@ type Props = {
 export function TaskList({ tasks, isLoading, onToggle, onDelete }: Props) {
   if (isLoading) {
     return (
-      <div className="rounded-lg border bg-white p-4 text-sm text-slate-600 shadow-sm">
-        Завантаження задач...
-      </div>
+      <Card>
+        <CardContent className="p-4 text-sm text-slate-600">
+          Завантаження задач...
+        </CardContent>
+      </Card>
     );
   }
 
   if (!tasks || tasks.length === 0) {
     return (
-      <div className="rounded-lg border bg-white p-4 text-sm text-slate-600 shadow-sm">
-        Поки що задач немає. Додай першу!
-      </div>
+      <Card>
+        <CardContent className="p-4 text-sm text-slate-600">
+          Поки що задач немає. Додай першу!
+        </CardContent>
+      </Card>
     );
   }
 

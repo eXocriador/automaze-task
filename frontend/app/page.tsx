@@ -6,6 +6,14 @@ import useSWR from "swr";
 import { TaskForm } from "@/components/task/TaskForm";
 import { TaskList } from "@/components/task/TaskList";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle
+} from "@/components/ui/card";
 import { createTask, deleteTask, fetchTasks, updateTask } from "@/lib/api";
 import { Task, TaskCreateInput, TaskSort, TaskStatus } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -102,31 +110,30 @@ export default function HomePage() {
   return (
     <main className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100">
       <div className="container py-12">
-        <div className="mx-auto flex max-w-4xl flex-col gap-8">
-          <header className="flex flex-col gap-4 rounded-xl border bg-white p-6 shadow-sm sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="text-sm font-medium text-slate-500">TODO Manager</p>
-              <h1 className="text-3xl font-semibold text-slate-900">
+        <div className="mx-auto flex max-w-[800px] flex-col gap-8">
+          <Card className="bg-gradient-to-r from-white to-slate-50">
+            <CardHeader className="gap-2">
+              <CardTitle className="text-3xl font-semibold text-slate-900">
                 Список задач
-              </h1>
-              <p className="text-sm text-slate-600">
-                Проксі на бекенд FastAPI через /api/tasks.
-              </p>
-            </div>
-            <div className="flex flex-wrap items-center gap-2 text-sm text-slate-700">
-              <span className="rounded-full bg-slate-100 px-3 py-1">
-                {isValidating ? "Оновлення..." : "Синхронізовано"}
-              </span>
-              <span className="rounded-full bg-emerald-100 px-3 py-1 text-emerald-700">
-                {doneCount} / {total} виконано
-              </span>
-            </div>
-          </header>
+              </CardTitle>
+              <CardDescription>
+                Next.js App Router + FastAPI через проксі /api/tasks
+              </CardDescription>
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge variant={isValidating ? "warning" : "success"}>
+                  {isValidating ? "Оновлення..." : "Синхронізовано"}
+                </Badge>
+                <Badge variant="secondary">
+                  {doneCount} / {total} виконано
+                </Badge>
+              </div>
+            </CardHeader>
+          </Card>
 
           <TaskForm onSubmit={handleCreate} />
 
-          <section className="rounded-xl border bg-white p-4 shadow-sm">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <Card>
+            <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex flex-wrap items-center gap-2">
                 {statusOptions.map((option) => (
                   <Button
@@ -168,8 +175,8 @@ export default function HomePage() {
                   ))}
                 </select>
               </div>
-            </div>
-          </section>
+            </CardContent>
+          </Card>
 
           <TaskList
             tasks={tasks}
