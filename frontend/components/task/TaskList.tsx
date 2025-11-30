@@ -1,5 +1,23 @@
 "use client";
 
+import {
+  DndContext,
+  DragEndEvent,
+  DragStartEvent,
+  DragOverEvent,
+  PointerSensor,
+  closestCenter,
+  useDroppable,
+  useSensor,
+  useSensors
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  arrayMove,
+  useSortable,
+  verticalListSortingStrategy
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { useMemo, useState } from "react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -24,108 +42,30 @@ type Props = {
   categories: string[];
 };
 
-export function TaskList({
-  tasks,
-  isLoading,
-  onToggle,
-  onDelete,
-  onReorder,
-  onMove,
-  onUpdate,
-  categories
-}: Props) {
-  const [draggingId, setDraggingId] = useState<number | null>(null);
-  const [hoverStatus, setHoverStatus] = useState<"done" | "undone" | null>(
-    null
-  );
+type Container = "undone" | "done";
 
-  const undone = useMemo(
-    () => (tasks ?? []).filter((t) => !t.completed),
-    [tasks]
-  );
-  const done = useMemo(() => (tasks ?? []).filter((t) => t.completed), [tasks]);
+type ColumnProps = {
+  title: string;
+  list: Task[];
+  status: Container;
+  emptyMessage: string;
+  loading: boolean;
+  children: React.ReactNode;
+};
 
-  const reorderList = (
-    items: Task[],
-    sourceId: number,
-    targetId: number | null
-  ): Task[] => {
-    const sourceIndex = items.findIndex((t) => t.id === sourceId);
-    if (sourceIndex === -1) return items;
-    const updated = [...items];
-    const [moved] = updated.splice(sourceIndex, 1);
-    if (targetId === null) {
-      updated.push(moved);
-    } else {
-      const targetIndex = updated.findIndex((t) => t.id === targetId);
-      if (targetIndex === -1) {
-        updated.push(moved);
-      } else {
-        updated.splice(targetIndex, 0, moved);
-      }
-    }
-    return updated;
-  };
+function Column({ title, list, status, emptyMessage, loading, children }: ColumnProps) {
+  const { setNodeRef, isOver } = useDroppable({
+    id: `${status}-dropzone`,
+    data: { type: "column", container: status }
+  });
 
-  const buildOptimistic = (updatedUndone: Task[], updatedDone: Task[]) => [
-    ...updatedUndone,
-    ...updatedDone
-  ];
-
-  const handleDrop = async (
-    targetStatus: "done" | "undone",
-    targetId: number | null = null
-  ) => {
-    setHoverStatus(null);
-    if (!tasks || draggingId === null) return;
-    const draggedTask = tasks.find((t) => t.id === draggingId);
-    if (!draggedTask) return;
-
-    const movingToDone = targetStatus === "done";
-    const sourceCompleted = draggedTask.completed;
-    const targetCompleted = movingToDone;
-
-    let updatedUndone = undone.filter((t) => t.id !== draggingId);
-    let updatedDone = done.filter((t) => t.id !== draggingId);
-
-    if (movingToDone) {
-      updatedDone = reorderList(
-        [...updatedDone, { ...draggedTask, completed: true }],
-        draggedTask.id,
-        targetId
-      );
-    } else {
-      updatedUndone = reorderList(
-        [...updatedUndone, { ...draggedTask, completed: false }],
-        draggedTask.id,
-        targetId
-      );
-    }
-
-    const optimisticTasks = buildOptimistic(updatedUndone, updatedDone);
-    const orderIds = optimisticTasks.map((t) => t.id);
-
-    await onMove(orderIds, draggedTask.id, targetCompleted, optimisticTasks);
-    setDraggingId(null);
-  };
-
-  const column = (
-    title: string,
-    list: Task[],
-    status: "done" | "undone",
-    emptyMessage: string,
-    loading: boolean
-  ) => (
+  return (
     <Card
       className={cn(
         "flex h-full flex-col transition-colors duration-200",
-        hoverStatus === status && draggingId
-          ? "border-slate-300 ring-1 ring-slate-200"
-          : "",
-        draggingId ? "cursor-grabbing" : "cursor-default"
+        isOver ? "border-slate-300 ring-1 ring-slate-200" : "",
+        "cursor-default"
       )}
-      onDragEnter={() => setHoverStatus(status)}
-      onDragLeave={() => setHoverStatus(null)}
     >
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
@@ -142,80 +82,276 @@ export function TaskList({
         </div>
       </CardHeader>
       <CardContent
-        className="flex flex-1 flex-col space-y-3 min-h-[220px]"
-        onDragOver={(e) => e.preventDefault()}
-        onDrop={() => handleDrop(status, null)}
+        ref={setNodeRef}
+        className={cn(
+          "flex flex-1 flex-col space-y-3 min-h-[220px]",
+          isOver ? "bg-slate-50/40" : ""
+        )}
       >
         {list.length === 0 ? (
           <div className="flex flex-1 items-center justify-center rounded-lg bg-white px-4 py-6 text-sm text-slate-500">
             {emptyMessage}
           </div>
         ) : (
-          list.map((task) => (
-            <TaskItem
-              key={task.id}
-              task={task}
-              onToggle={onToggle}
-              onDelete={onDelete}
-              onUpdate={onUpdate}
-              categories={categories}
-              draggable
-              onDragStart={() => setDraggingId(task.id)}
-              onDragOver={(e) => e.preventDefault()}
-              onDrop={() => handleDrop(status, task.id)}
-              dimmed={draggingId === task.id}
-            />
-          ))
+          children
         )}
       </CardContent>
     </Card>
   );
+}
 
-  const hasTasks = (tasks ?? []).length > 0;
-  const showSkeleton = !tasks && isLoading;
+function SortableTask({
+  task,
+  container,
+  onToggle,
+  onDelete,
+  onUpdate,
+  categories
+}: {
+  task: Task;
+  container: Container;
+  onToggle: (task: Task) => Promise<void>;
+  onDelete: (task: Task) => Promise<void>;
+  onUpdate: (taskId: number, payload: TaskUpdateInput) => Promise<void>;
+  categories: string[];
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging
+  } = useSortable({
+    id: task.id,
+    data: { type: "item", container }
+  });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition
+  };
 
   return (
-    <div className="grid items-stretch gap-4 transition duration-300 md:grid-cols-2">
-      {showSkeleton ? (
-        <>
-          <Card className="flex h-full flex-col border-slate-200 bg-white">
-            <CardHeader className="pb-3">
-              <div className="flex items-start justify-between">
-                <CardTitle className="text-lg">Undone</CardTitle>
-                <div className="flex h-5 w-8 items-center justify-center">
-                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-slate-500" />
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="flex flex-1 flex-col min-h-[220px]">
-              <div className="flex flex-1 rounded-lg bg-white" />
-            </CardContent>
-          </Card>
-          <Card className="flex h-full flex-col border-slate-200 bg-white">
-            <CardHeader className="pb-3">
-              <div className="flex items-start justify-between">
-                <CardTitle className="text-lg">Done</CardTitle>
-                <div className="flex h-5 w-8 items-center justify-center">
-                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-slate-500" />
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="flex flex-1 flex-col min-h-[220px]">
-              <div className="flex flex-1 rounded-lg bg-white" />
-            </CardContent>
-          </Card>
-        </>
-      ) : hasTasks ? (
-        <>
-          {column("Undone", undone, "undone", "Nothing pending", isLoading)}
-          {column("Done", done, "done", "No completed tasks", isLoading)}
-        </>
-      ) : (
-        <>
-          {column("Undone", [], "undone", "Nothing pending", isLoading)}
-          {column("Done", [], "done", "No completed tasks", isLoading)}
-        </>
-      )}
+    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+      <TaskItem
+        task={task}
+        onToggle={onToggle}
+        onDelete={onDelete}
+        onUpdate={onUpdate}
+        categories={categories}
+        isDragging={isDragging}
+      />
     </div>
+  );
+}
+
+export function TaskList({
+  tasks,
+  isLoading,
+  onToggle,
+  onDelete,
+  onReorder,
+  onMove,
+  onUpdate,
+  categories
+}: Props) {
+  const [activeId, setActiveId] = useState<number | null>(null);
+  const [overContainer, setOverContainer] = useState<Container | null>(null);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 6 }
+    })
+  );
+
+  const undone = useMemo(
+    () => (tasks ?? []).filter((t) => !t.completed),
+    [tasks]
+  );
+  const done = useMemo(() => (tasks ?? []).filter((t) => t.completed), [tasks]);
+
+  const getContainer = (id: number): Container | null => {
+    if (undone.find((t) => t.id === id)) return "undone";
+    if (done.find((t) => t.id === id)) return "done";
+    return null;
+  };
+
+  const handleDragStart = (event: DragStartEvent) => {
+    const { active } = event;
+    setActiveId(Number(active.id));
+    const container = active.data.current?.container as Container | undefined;
+    if (container) setOverContainer(container);
+  };
+
+  const handleDragOver = (event: DragOverEvent) => {
+    const container = event.over?.data.current?.container as Container | undefined;
+    if (container) setOverContainer(container);
+  };
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || !tasks) {
+      setActiveId(null);
+      setOverContainer(null);
+      return;
+    }
+
+    const activeTaskId = Number(active.id);
+    const overType = over.data.current?.type as "item" | "column" | undefined;
+    const overItemId =
+      overType === "item" && typeof over.id === "number"
+        ? Number(over.id)
+        : null;
+    const activeContainer =
+      (active.data.current?.container as Container | undefined) ||
+      getContainer(activeTaskId);
+    const overContainer =
+      (over.data.current?.container as Container | undefined) || activeContainer;
+
+    if (!activeContainer || !overContainer) {
+      setActiveId(null);
+      setOverContainer(null);
+      return;
+    }
+
+    if (activeContainer === overContainer) {
+      const list = activeContainer === "undone" ? undone : done;
+      const ids = list.map((t) => t.id);
+      const targetIndex =
+        overType === "item" && overItemId !== null
+          ? ids.indexOf(overItemId)
+          : Math.max(ids.length - 1, 0);
+      const newIds = arrayMove(
+        ids,
+        ids.indexOf(activeTaskId),
+        targetIndex
+      );
+      const reordered =
+        activeContainer === "undone"
+          ? newIds.map((id) => undone.find((t) => t.id === id)!)
+          : newIds.map((id) => done.find((t) => t.id === id)!);
+      const optimistic =
+        activeContainer === "undone"
+          ? [...reordered, ...done]
+          : [...undone, ...reordered];
+      await onReorder(optimistic.map((t) => t.id), optimistic);
+    } else {
+      const fromList = activeContainer === "undone" ? undone : done;
+      const toList = overContainer === "undone" ? undone : done;
+      const movingTask = fromList.find((t) => t.id === activeTaskId);
+      if (!movingTask) {
+        setActiveId(null);
+        return;
+      }
+      const remainingSource = fromList.filter((t) => t.id !== activeTaskId);
+      const targetIndex =
+        overType === "item" && overItemId !== null
+          ? toList.findIndex((t) => t.id === overItemId)
+          : toList.length;
+      const updatedTarget = [
+        ...toList.slice(0, targetIndex),
+        { ...movingTask, completed: overContainer === "done" },
+        ...toList.slice(targetIndex)
+      ];
+
+      const optimistic =
+        overContainer === "undone"
+          ? [...updatedTarget, ...remainingSource]
+          : [...remainingSource, ...updatedTarget];
+
+      await onMove(
+        optimistic.map((t) => t.id),
+        activeTaskId,
+        overContainer === "done",
+        optimistic
+      );
+    }
+
+    setActiveId(null);
+    setOverContainer(null);
+  };
+
+  const activeTask = tasks?.find((t) => t.id === activeId);
+
+  return (
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      onDragStart={handleDragStart}
+      onDragOver={handleDragOver}
+      onDragEnd={handleDragEnd}
+    >
+      <div className="grid items-stretch gap-4 transition duration-300 md:grid-cols-2">
+        <Column
+          title="Undone"
+          list={undone}
+          status="undone"
+          emptyMessage="Nothing pending"
+          loading={isLoading}
+        >
+          <SortableContext
+            items={[
+              ...undone.map((t) => t.id),
+              ...(overContainer === "undone" && activeTask && !undone.some((t) => t.id === activeTask.id)
+                ? [activeTask.id]
+                : [])
+            ]}
+            strategy={verticalListSortingStrategy}
+          >
+            {undone.map((task) => (
+              <SortableTask
+                key={task.id}
+                task={task}
+                container="undone"
+                onToggle={onToggle}
+                onDelete={onDelete}
+                onUpdate={onUpdate}
+                categories={categories}
+              />
+            ))}
+            {overContainer === "undone" &&
+            activeTask &&
+            !undone.some((t) => t.id === activeTask.id) ? (
+              <div className="h-16 rounded-md border-2 border-dashed border-slate-300 bg-white/80" />
+            ) : null}
+          </SortableContext>
+        </Column>
+        <Column
+          title="Done"
+          list={done}
+          status="done"
+          emptyMessage="No completed tasks"
+          loading={isLoading}
+        >
+          <SortableContext
+            items={[
+              ...done.map((t) => t.id),
+              ...(overContainer === "done" && activeTask && !done.some((t) => t.id === activeTask.id)
+                ? [activeTask.id]
+                : [])
+            ]}
+            strategy={verticalListSortingStrategy}
+          >
+            {done.map((task) => (
+              <SortableTask
+                key={task.id}
+                task={task}
+                container="done"
+                onToggle={onToggle}
+                onDelete={onDelete}
+                onUpdate={onUpdate}
+                categories={categories}
+              />
+            ))}
+            {overContainer === "done" &&
+            activeTask &&
+            !done.some((t) => t.id === activeTask.id) ? (
+              <div className="h-16 rounded-md border-2 border-dashed border-slate-300 bg-white/80" />
+            ) : null}
+          </SortableContext>
+        </Column>
+      </div>
+    </DndContext>
   );
 }

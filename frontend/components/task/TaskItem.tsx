@@ -1,5 +1,7 @@
 'use client';
 
+import React from "react";
+
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -20,12 +22,9 @@ type Props = {
   onDelete: (task: Task) => Promise<void>;
   onUpdate: (taskId: number, payload: TaskUpdateInput) => Promise<void>;
   categories: string[];
-  draggable?: boolean;
-  onDragStart?: () => void;
-  onDragOver?: (e: React.DragEvent<HTMLDivElement>) => void;
-  onDrop?: () => void;
   isDragging?: boolean;
-  dimmed?: boolean;
+  nodeRef?: (el: HTMLElement | null) => void;
+  style?: React.CSSProperties;
 };
 
 export function TaskItem({
@@ -34,29 +33,22 @@ export function TaskItem({
   onDelete,
   onUpdate,
   categories,
-  draggable = false,
-  onDragStart,
-  onDragOver,
-  onDrop,
   isDragging = false,
-  dimmed = false
+  nodeRef,
+  style
 }: Props) {
   return (
     <Card
-      draggable={draggable}
-      onDragStart={onDragStart}
-      onDragOver={onDragOver}
-      onDrop={onDrop}
+      ref={nodeRef}
+      style={style}
       className={cn(
         "transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md",
-        dimmed ? "opacity-50" : "",
-        draggable && "cursor-grab active:cursor-grabbing",
-        isDragging && "cursor-grabbing"
+        isDragging && "cursor-grabbing opacity-60"
       )}
     >
-      <CardContent className="flex items-start gap-3 p-4">
-        <div className="flex flex-1 flex-col gap-2">
-          <div>
+      <CardContent className="flex items-start gap-4 p-4">
+        <div className="flex flex-1 flex-col gap-3">
+          <div className="space-y-1">
             <p
               className={cn(
                 "text-base font-semibold text-slate-900",
@@ -77,13 +69,20 @@ export function TaskItem({
                 const p = i + 1;
                 return { label: `Priority: ${p}`, value: String(p) };
               })}
-              className="w-32"
+              className="h-11 min-w-[150px]"
             />
             <Select
-              value={task.category ?? ""}
-              onChange={(v) => onUpdate(task.id, { category: v || undefined })}
-              options={[{ label: "No category", value: "" }, ...categories.map((c) => ({ label: c, value: c }))]}
-              className="w-32"
+              value={task.category ?? "__none__"}
+              onChange={(v) =>
+                onUpdate(task.id, {
+                  category: v === "__none__" ? undefined : v
+                })
+              }
+              options={[
+                { label: "No category", value: "__none__" },
+                ...categories.map((c) => ({ label: c, value: c }))
+              ]}
+              className="h-11 min-w-[150px]"
             />
             {formatDate(task.due_date) ? (
               <Badge variant="secondary">Due: {formatDate(task.due_date)}</Badge>
