@@ -1,11 +1,13 @@
 import os
+from datetime import datetime, timedelta
 from typing import List
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse
 
-from .db import Base, engine, ensure_sqlite_columns
+from .db import Base, engine, ensure_sqlite_columns, SessionLocal
+from . import models, schemas, crud
 from .routers import tasks
 
 
@@ -31,6 +33,7 @@ def create_app() -> FastAPI:
     def on_startup() -> None:
         Base.metadata.create_all(bind=engine)
         ensure_sqlite_columns(engine)
+        seed_initial_tasks()
 
     @app.get("/", include_in_schema=False, response_class=HTMLResponse)
     def landing() -> str:
@@ -75,6 +78,85 @@ def create_app() -> FastAPI:
 
 
 app = create_app()
+
+
+def seed_initial_tasks() -> None:
+    """Populate initial demo tasks if the database is empty."""
+    session = SessionLocal()
+    try:
+        existing = session.query(models.Task).count()
+        if existing > 0:
+            return
+
+        now = datetime.utcnow()
+        seeds = [
+            schemas.TaskCreate(
+                title="Plan sprint",
+                description="Outline goals and tickets",
+                priority=8,
+                category="Work",
+                due_date=now + timedelta(days=3),
+            ),
+            schemas.TaskCreate(
+                title="Write API docs",
+                description="Document tasks endpoints",
+                priority=7,
+                category="Work",
+            ),
+            schemas.TaskCreate(
+                title="Grocery run",
+                description="Milk, vegetables, snacks",
+                priority=5,
+                category="Home",
+            ),
+            schemas.TaskCreate(
+                title="Workout",
+                description="30 min cardio + stretching",
+                priority=6,
+                category="Personal",
+            ),
+            schemas.TaskCreate(
+                title="Read 20 pages",
+                description="Product strategy book",
+                priority=4,
+                category="Personal",
+            ),
+            schemas.TaskCreate(
+                title="Fix lint warnings",
+                description="Frontend build cleanup",
+                priority=6,
+                category="Work",
+            ),
+            schemas.TaskCreate(
+                title="Pay utilities",
+                priority=5,
+                category="Home",
+            ),
+            schemas.TaskCreate(
+                title="Study SQL",
+                description="Indexes and query plans",
+                priority=7,
+                category="Study",
+            ),
+            schemas.TaskCreate(
+                title="Refine UI states",
+                description="Empty, loading, and error cases",
+                priority=8,
+                category="Work",
+                completed=True,
+            ),
+            schemas.TaskCreate(
+                title="Plan weekend trip",
+                priority=3,
+                category="Personal",
+            ),
+        ]
+
+        for idx, payload in enumerate(seeds, start=1):
+            payload.order_index = idx
+            crud.create_task(session, payload)
+    finally:
+        session.close()
 
 
 if __name__ == "__main__":
