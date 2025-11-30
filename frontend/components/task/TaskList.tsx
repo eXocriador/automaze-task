@@ -1,8 +1,14 @@
-'use client';
+"use client";
 
 import { useMemo, useState } from "react";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle
+} from "@/components/ui/card";
 import { Task } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -35,12 +41,21 @@ export function TaskList({
   categories
 }: Props) {
   const [draggingId, setDraggingId] = useState<number | null>(null);
-  const [hoverStatus, setHoverStatus] = useState<"done" | "undone" | null>(null);
+  const [hoverStatus, setHoverStatus] = useState<"done" | "undone" | null>(
+    null
+  );
 
-  const undone = useMemo(() => (tasks ?? []).filter((t) => !t.completed), [tasks]);
+  const undone = useMemo(
+    () => (tasks ?? []).filter((t) => !t.completed),
+    [tasks]
+  );
   const done = useMemo(() => (tasks ?? []).filter((t) => t.completed), [tasks]);
 
-  const reorderList = (items: Task[], sourceId: number, targetId: number | null): Task[] => {
+  const reorderList = (
+    items: Task[],
+    sourceId: number,
+    targetId: number | null
+  ): Task[] => {
     const sourceIndex = items.findIndex((t) => t.id === sourceId);
     if (sourceIndex === -1) return items;
     const updated = [...items];
@@ -110,7 +125,9 @@ export function TaskList({
     <Card
       className={cn(
         "flex h-full flex-col transition-colors duration-200",
-        hoverStatus === status && draggingId ? "border-slate-300 ring-1 ring-slate-200" : "",
+        hoverStatus === status && draggingId
+          ? "border-slate-300 ring-1 ring-slate-200"
+          : "",
         draggingId ? "cursor-grabbing" : "cursor-default"
       )}
       onDragEnter={() => setHoverStatus(status)}

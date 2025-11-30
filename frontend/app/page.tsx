@@ -15,7 +15,6 @@ import {
   CardTitle
 } from "@/components/ui/card";
 import { Modal } from "@/components/ui/modal";
-import { Select } from "@/components/ui/select";
 import {
   createTask,
   deleteTask,
@@ -24,7 +23,7 @@ import {
   reorderTasks
 } from "@/lib/api";
 import { Task, TaskCreateInput, TaskSort, TaskStatus } from "@/lib/types";
-import { cn } from "@/lib/utils";
+import { TaskFilters } from "@/components/filters/TaskFilters";
 
 const categoryOptions = ["Work", "Personal", "Home", "Study"];
 const sortOptions: { value: TaskSort; label: string }[] = [
@@ -223,35 +222,16 @@ export default function HomePage() {
 
           <Card>
             <CardContent className="p-5">
-              <div className="flex flex-col gap-3 md:flex-row md:items-center md:gap-4">
-                <input
-                  type="text"
-                  placeholder="Search..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="flex-1 rounded-md border border-slate-200 px-3 py-2 text-sm outline-none transition focus:border-slate-400 hover:border-slate-300"
-                />
-                <div className="flex w-full max-w-[480px] flex-none justify-end gap-3 md:w-auto">
-                  <Select
-                    value={category}
-                    onChange={(v) => setCategory(v)}
-                    options={[
-                      { label: "All categories", value: "" },
-                      ...categoryOptions.map((c) => ({ label: c, value: c }))
-                    ]}
-                    className="w-1/2"
-                  />
-                  <Select
-                    value={sort ?? ""}
-                    onChange={(v) => setSort(v === "" ? null : (v as TaskSort))}
-                    options={sortOptions.map((o) => ({
-                      label: o.label,
-                      value: o.value ?? ""
-                    }))}
-                    className="w-1/2"
-                  />
-                </div>
-              </div>
+              <TaskFilters
+                search={search}
+                onSearchChange={setSearch}
+                category={category}
+                onCategoryChange={setCategory}
+                sort={sort}
+                onSortChange={(v) => setSort(v as TaskSort)}
+                categoryOptions={categoryOptions}
+                sortOptions={sortOptions}
+              />
             </CardContent>
           </Card>
 

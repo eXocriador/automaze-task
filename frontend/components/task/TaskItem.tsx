@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { Select } from "@/components/ui/select";
 import { Task } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -69,29 +70,21 @@ export function TaskItem({
             ) : null}
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <select
-              value={task.priority}
-              onChange={(e) => onUpdate(task.id, { priority: Number(e.target.value) })}
-              className="rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-700 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200 cursor-pointer"
-            >
-              {Array.from({ length: 10 }, (_, i) => i + 1).map((p) => (
-                <option key={p} value={p}>
-                  Priority: {p}
-                </option>
-              ))}
-            </select>
-            <select
+            <Select
+              value={String(task.priority)}
+              onChange={(v) => onUpdate(task.id, { priority: Number(v) })}
+              options={Array.from({ length: 10 }, (_, i) => {
+                const p = i + 1;
+                return { label: `Priority: ${p}`, value: String(p) };
+              })}
+              className="w-32"
+            />
+            <Select
               value={task.category ?? ""}
-              onChange={(e) => onUpdate(task.id, { category: e.target.value || null })}
-              className="rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-700 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200 cursor-pointer"
-            >
-              <option value="">No category</option>
-              {categories.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
+              onChange={(v) => onUpdate(task.id, { category: v || null })}
+              options={[{ label: "No category", value: "" }, ...categories.map((c) => ({ label: c, value: c }))]}
+              className="w-32"
+            />
             {formatDate(task.due_date) ? (
               <Badge variant="secondary">Due: {formatDate(task.due_date)}</Badge>
             ) : null}
