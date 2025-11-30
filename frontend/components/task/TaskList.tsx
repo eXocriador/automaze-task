@@ -136,6 +136,7 @@ export function TaskList({
   categories
 }: Props) {
   const [activeId, setActiveId] = useState<number | null>(null);
+  const [activeTab, setActiveTab] = useState<Container>("undone");
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -248,57 +249,80 @@ export function TaskList({
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
+      <div className="mb-3 flex gap-2 md:hidden">
+        {(["undone", "done"] as Container[]).map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={cn(
+              "flex-1 rounded-lg border px-3 py-2 text-sm font-semibold transition",
+              activeTab === tab
+                ? "border-slate-300 bg-white text-slate-900 shadow-sm"
+                : "border-slate-200 bg-slate-100 text-slate-500"
+            )}
+          >
+            {tab === "undone" ? "Undone" : "Done"}{" "}
+            {tab === "undone" ? `(${undone.length})` : `(${done.length})`}
+          </button>
+        ))}
+      </div>
+
       <div className="grid items-stretch gap-4 transition duration-300 md:grid-cols-2">
-        <Column
-          title="Undone"
-          list={undone}
-          status="undone"
-          emptyMessage="Nothing pending"
-          loading={isLoading}
-        >
-          <SortableContext
-            items={undone.map((t) => t.id)}
-            strategy={verticalListSortingStrategy}
+        <div className={cn("md:block", activeTab === "undone" ? "block" : "hidden")}>
+          <Column
+            title="Undone"
+            list={undone}
+            status="undone"
+            emptyMessage="Nothing pending"
+            loading={isLoading}
           >
-            {undone.map((task) => (
-              <SortableTask
-                key={task.id}
-                id={task.id}
-                task={task}
-                container="undone"
-                onToggle={onToggle}
-                onDelete={onDelete}
-                onUpdate={onUpdate}
-                categories={categories}
-              />
-            ))}
-          </SortableContext>
-        </Column>
-        <Column
-          title="Done"
-          list={done}
-          status="done"
-          emptyMessage="No completed tasks"
-          loading={isLoading}
-        >
-          <SortableContext
-            items={done.map((t) => t.id)}
-            strategy={verticalListSortingStrategy}
+            <SortableContext
+              items={undone.map((t) => t.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              {undone.map((task) => (
+                <SortableTask
+                  key={task.id}
+                  id={task.id}
+                  task={task}
+                  container="undone"
+                  onToggle={onToggle}
+                  onDelete={onDelete}
+                  onUpdate={onUpdate}
+                  categories={categories}
+                />
+              ))}
+            </SortableContext>
+          </Column>
+        </div>
+
+        <div className={cn("md:block", activeTab === "done" ? "block" : "hidden")}>
+          <Column
+            title="Done"
+            list={done}
+            status="done"
+            emptyMessage="No completed tasks"
+            loading={isLoading}
           >
-            {done.map((task) => (
-              <SortableTask
-                key={task.id}
-                id={task.id}
-                task={task}
-                container="done"
-                onToggle={onToggle}
-                onDelete={onDelete}
-                onUpdate={onUpdate}
-                categories={categories}
-              />
-            ))}
-          </SortableContext>
-        </Column>
+            <SortableContext
+              items={done.map((t) => t.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              {done.map((task) => (
+                <SortableTask
+                  key={task.id}
+                  id={task.id}
+                  task={task}
+                  container="done"
+                  onToggle={onToggle}
+                  onDelete={onDelete}
+                  onUpdate={onUpdate}
+                  categories={categories}
+                />
+              ))}
+            </SortableContext>
+          </Column>
+        </div>
       </div>
       <DragOverlay dropAnimation={null}>
         {activeId ? (

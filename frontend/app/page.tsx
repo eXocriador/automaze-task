@@ -204,22 +204,34 @@ export default function HomePage() {
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100">
-      <div className="container py-8">
-        <div className="mx-auto flex max-w-[900px] flex-col gap-5">
+      <div className="container pt-4 pb-8 md:pt-8">
+        <div className="mx-auto flex max-w-[900px] flex-col gap-4">
           <Card className="bg-gradient-to-r from-white to-slate-50">
-            <CardHeader className="pb-5">
-              <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                <CardTitle className="text-3xl font-semibold text-slate-900">
-                  Task manager
-                </CardTitle>
-                <div className="flex flex-col items-end gap-2 md:flex-row md:items-center md:gap-3">
-                  <Badge variant={isValidating ? "warning" : "success"}>
+            <CardHeader className="pb-4">
+              <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                <div className="flex items-center justify-between gap-3 md:flex-col md:items-start md:gap-1">
+                  <CardTitle className="text-2xl font-semibold text-slate-900 md:text-3xl">
+                    Task manager
+                  </CardTitle>
+                  <div className="flex items-center gap-2 md:hidden">
+                    <Badge variant={isValidating ? "warning" : "success"}>
+                      {isValidating ? "Refreshing" : "Synced"}
+                    </Badge>
+                    <Badge variant="secondary">
+                      {doneCount} / {total} done
+                    </Badge>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 md:gap-3">
+                  <Badge className="hidden md:inline-flex" variant={isValidating ? "warning" : "success"}>
                     {isValidating ? "Refreshing" : "Synced"}
                   </Badge>
-                  <Badge variant="secondary">
+                  <Badge className="hidden md:inline-flex" variant="secondary">
                     {doneCount} / {total} done
                   </Badge>
-                  <Button onClick={() => setIsModalOpen(true)}>Add task</Button>
+                  <Button className="whitespace-nowrap" onClick={() => setIsModalOpen(true)}>
+                    Add task
+                  </Button>
                 </div>
               </div>
             </CardHeader>
