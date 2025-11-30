@@ -14,6 +14,8 @@ export function TaskForm({ onSubmit }: Props) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState(5);
+   const [category, setCategory] = useState("");
+   const [dueDate, setDueDate] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -27,11 +29,15 @@ export function TaskForm({ onSubmit }: Props) {
         title: title.trim(),
         description: description.trim() || undefined,
         priority,
-        completed: false
+        completed: false,
+        category: category.trim() || undefined,
+        due_date: dueDate ? new Date(dueDate).toISOString() : undefined
       });
       setTitle("");
       setDescription("");
       setPriority(5);
+      setCategory("");
+      setDueDate("");
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to create task";
       setError(message);
@@ -67,6 +73,27 @@ export function TaskForm({ onSubmit }: Props) {
               onChange={(e) => setDescription(e.target.value)}
               rows={2}
             />
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div>
+              <label className="text-sm font-medium text-slate-700">Category</label>
+              <input
+                className="mt-1 w-full rounded-md border border-slate-200 px-3 py-2 text-sm outline-none ring-offset-2 focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+                placeholder="e.g. Work, Home"
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                maxLength={100}
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium text-slate-700">Due date</label>
+              <input
+                type="date"
+                className="mt-1 w-full rounded-md border border-slate-200 px-3 py-2 text-sm outline-none ring-offset-2 focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+                value={dueDate}
+                onChange={(e) => setDueDate(e.target.value)}
+              />
+            </div>
           </div>
           <div className="flex items-center gap-3">
             <label className="text-sm font-medium text-slate-700">Priority</label>

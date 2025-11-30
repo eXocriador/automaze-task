@@ -15,6 +15,7 @@ def list_tasks(
     search: Optional[str] = None,
     status: Optional[str] = None,
     sort: Optional[str] = None,
+    category: Optional[str] = None,
 ) -> List[models.Task]:
     stmt = select(models.Task)
 
@@ -27,6 +28,9 @@ def list_tasks(
             )
         )
 
+    if category:
+        stmt = stmt.where(models.Task.category.ilike(category))
+
     if status == "done":
         stmt = stmt.where(models.Task.completed.is_(True))
     elif status == "undone":
@@ -36,6 +40,10 @@ def list_tasks(
         stmt = stmt.order_by(models.Task.priority.desc(), models.Task.id.desc())
     elif sort == "priority_asc":
         stmt = stmt.order_by(models.Task.priority.asc(), models.Task.id.desc())
+    elif sort == "due_date_asc":
+        stmt = stmt.order_by(models.Task.due_date.is_(None), models.Task.due_date.asc(), models.Task.id.desc())
+    elif sort == "due_date_desc":
+        stmt = stmt.order_by(models.Task.due_date.is_(None), models.Task.due_date.desc(), models.Task.id.desc())
     else:
         stmt = stmt.order_by(models.Task.created_at.desc(), models.Task.id.desc())
 

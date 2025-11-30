@@ -5,7 +5,7 @@ Production-ready TODO manager with FastAPI + SQLAlchemy backend and Next.js (App
 ## Features
 - List, search, filter (all/done/undone), and sort tasks by priority.
 - Create, update (toggle done/undone), and delete tasks.
-- Priority 1–10 validation enforced at DB and API levels.
+- Priority 1–10 validation enforced at DB and API levels; optional category and due date for tasks.
 - SQLite by default; configurable `DATABASE_URL` for production.
 - Next.js API routes proxy to the backend; SWR-powered optimistic UI.
 

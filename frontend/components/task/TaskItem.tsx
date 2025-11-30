@@ -6,6 +6,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Task } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
+function formatDate(value?: string | null): string | null {
+  if (!value) return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  return date.toLocaleDateString();
+}
+
 type Props = {
   task: Task;
   onToggle: (task: Task) => Promise<void>;
@@ -44,6 +51,12 @@ export function TaskItem({ task, onToggle, onDelete }: Props) {
             <Badge variant={task.completed ? "success" : "warning"}>
               {task.completed ? "Completed" : "In progress"}
             </Badge>
+            {task.category ? (
+              <Badge variant="outline">Category: {task.category}</Badge>
+            ) : null}
+            {formatDate(task.due_date) ? (
+              <Badge variant="secondary">Due: {formatDate(task.due_date)}</Badge>
+            ) : null}
           </div>
         </div>
         <div className="flex flex-col gap-2 sm:flex-row">

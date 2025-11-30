@@ -4,6 +4,7 @@ type FetchParams = {
   search?: string | null;
   status?: TaskStatus | null;
   sort?: TaskSort;
+  category?: string | null;
 };
 
 const baseUrl = "/api/tasks";
@@ -22,6 +23,7 @@ export async function fetchTasks(params: FetchParams = {}): Promise<Task[]> {
   if (params.search) qs.set("search", params.search);
   if (params.status && params.status !== "all") qs.set("status", params.status);
   if (params.sort) qs.set("sort", params.sort);
+  if (params.category) qs.set("category", params.category);
 
   const url = qs.toString() ? `${baseUrl}?${qs.toString()}` : baseUrl;
   const response = await fetch(url, { cache: "no-store" });

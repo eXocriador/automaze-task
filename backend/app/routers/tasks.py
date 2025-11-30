@@ -10,7 +10,7 @@ router = APIRouter(prefix="/tasks", tags=["tasks"])
 
 
 StatusFilter = Literal["all", "done", "undone"]
-SortOption = Literal["priority_asc", "priority_desc"]
+SortOption = Literal["priority_asc", "priority_desc", "due_date_asc", "due_date_desc"]
 
 
 @router.get(
@@ -22,10 +22,13 @@ def list_tasks(
     search: Annotated[Optional[str], Query(min_length=1, max_length=255)] = None,
     status: Annotated[Optional[StatusFilter], Query()] = None,
     sort: Annotated[Optional[SortOption], Query()] = None,
+    category: Annotated[Optional[str], Query(min_length=1, max_length=100)] = None,
     db: Session = Depends(get_db),
 ) -> List[schemas.Task]:
     normalized_status = None if status in (None, "all") else status
-    return crud.list_tasks(db, search=search, status=normalized_status, sort=sort)
+    return crud.list_tasks(
+        db, search=search, status=normalized_status, sort=sort, category=category
+    )
 
 
 @router.post(

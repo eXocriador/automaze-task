@@ -8,6 +8,8 @@ class TaskBase(BaseModel):
     title: str = Field(..., min_length=1, max_length=255)
     description: Optional[str] = None
     priority: int = Field(default=1, ge=1, le=10)
+    category: Optional[str] = Field(default=None, max_length=100)
+    due_date: Optional[datetime] = None
 
 
 class TaskCreate(TaskBase):
@@ -19,6 +21,8 @@ class TaskUpdate(BaseModel):
     description: Optional[str] = None
     priority: Optional[int] = Field(default=None, ge=1, le=10)
     completed: Optional[bool] = None
+    category: Optional[str] = Field(default=None, max_length=100)
+    due_date: Optional[datetime] = None
 
 
 class Task(TaskBase):

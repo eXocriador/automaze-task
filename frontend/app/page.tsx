@@ -22,21 +22,25 @@ const statusOptions: TaskStatus[] = ["all", "done", "undone"];
 const sortOptions: { value: TaskSort; label: string }[] = [
   { value: null, label: "Newest first" },
   { value: "priority_desc", label: "Priority ↓" },
-  { value: "priority_asc", label: "Priority ↑" }
+  { value: "priority_asc", label: "Priority ↑" },
+  { value: "due_date_asc", label: "Due date ↑" },
+  { value: "due_date_desc", label: "Due date ↓" }
 ];
 
 export default function HomePage() {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<TaskStatus>("all");
   const [sort, setSort] = useState<TaskSort>(null);
+  const [category, setCategory] = useState<string>("");
 
   const { data: tasks, isLoading, mutate, isValidating } = useSWR(
-    ["tasks", search, status, sort],
+    ["tasks", search, status, sort, category],
     () =>
       fetchTasks({
         search: search.trim() || null,
         status,
-        sort
+        sort,
+        category: category.trim() || null
       }),
     { revalidateOnFocus: false }
   );
@@ -61,6 +65,8 @@ export default function HomePage() {
             description: payload.description,
             completed: payload.completed ?? false,
             priority: payload.priority ?? 1,
+            category: payload.category,
+            due_date: payload.due_date,
             created_at: new Date().toISOString()
           },
           ...(current ?? [])
@@ -156,6 +162,13 @@ export default function HomePage() {
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="w-full min-w-[200px] rounded-md border border-slate-200 px-3 py-2 text-sm outline-none ring-offset-2 focus:border-slate-400 focus:ring-2 focus:ring-slate-200 sm:w-64"
+                />
+                <input
+                  type="text"
+                  placeholder="Category..."
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  className="w-full min-w-[160px] rounded-md border border-slate-200 px-3 py-2 text-sm outline-none ring-offset-2 focus:border-slate-400 focus:ring-2 focus:ring-slate-200 sm:w-52"
                 />
                 <select
                   value={sort ?? ""}

@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse
 
-from .db import Base, engine
+from .db import Base, engine, ensure_sqlite_columns
 from .routers import tasks
 
 
@@ -30,6 +30,7 @@ def create_app() -> FastAPI:
     @app.on_event("startup")
     def on_startup() -> None:
         Base.metadata.create_all(bind=engine)
+        ensure_sqlite_columns(engine)
 
     @app.get("/", include_in_schema=False, response_class=HTMLResponse)
     def landing() -> str:
