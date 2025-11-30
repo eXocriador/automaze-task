@@ -30,6 +30,10 @@ def create_app() -> FastAPI:
     def on_startup() -> None:
         Base.metadata.create_all(bind=engine)
 
+    @app.get("/", include_in_schema=False)
+    def healthcheck() -> dict[str, str]:
+        return {"status": "ok"}
+
     app.include_router(tasks.router)
     return app
 

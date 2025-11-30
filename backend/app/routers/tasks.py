@@ -62,3 +62,22 @@ def delete_task(task_id: int, db: Session = Depends(get_db)) -> None:
     if not db_task:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Task not found")
     crud.delete_task(db, db_task)
+
+# Allow routes without trailing slash to avoid 307 redirects
+router.add_api_route(
+    "",
+    list_tasks,
+    methods=["GET"],
+    response_model=List[schemas.Task],
+    summary="List tasks with search, filter, and sort",
+    include_in_schema=False,
+)
+router.add_api_route(
+    "",
+    create_task,
+    methods=["POST"],
+    response_model=schemas.Task,
+    status_code=status.HTTP_201_CREATED,
+    summary="Create a new task",
+    include_in_schema=False,
+)
