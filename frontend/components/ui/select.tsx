@@ -29,7 +29,7 @@ export function Select({ value, onChange, options, placeholder, className }: Sel
         )}
       >
         <RadixSelect.Value placeholder={placeholder ?? "Select"} />
-        <RadixSelect.Icon>
+        <RadixSelect.Icon className="ml-auto">
           <ChevronDownIcon className="h-4 w-4 text-slate-500" />
         </RadixSelect.Icon>
       </RadixSelect.Trigger>
@@ -52,10 +52,7 @@ export function Select({ value, onChange, options, placeholder, className }: Sel
                   "data-[state=checked]:bg-slate-100 data-[state=checked]:font-semibold"
                 )}
               >
-                <RadixSelect.ItemText>{opt.label}</RadixSelect.ItemText>
-                <RadixSelect.ItemIndicator>
-                  <CheckIcon className="h-4 w-4 text-slate-600" />
-                </RadixSelect.ItemIndicator>
+                <RadixSelect.ItemText className="mr-auto">{opt.label}</RadixSelect.ItemText>
               </RadixSelect.Item>
             ))}
           </RadixSelect.Viewport>

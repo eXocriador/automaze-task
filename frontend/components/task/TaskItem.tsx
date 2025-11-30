@@ -43,7 +43,7 @@ export function TaskItem({
       style={style}
       className={cn(
         "transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md",
-        isDragging && "cursor-grabbing opacity-60"
+        isDragging && "cursor-grabbing"
       )}
     >
       <CardContent className="flex items-start gap-4 p-4">
@@ -69,7 +69,7 @@ export function TaskItem({
                 const p = i + 1;
                 return { label: `Priority: ${p}`, value: String(p) };
               })}
-              className="h-11 min-w-[150px]"
+              className="min-w-[150px]"
             />
             <Select
               value={task.category ?? "__none__"}
@@ -82,7 +82,7 @@ export function TaskItem({
                 { label: "No category", value: "__none__" },
                 ...categories.map((c) => ({ label: c, value: c }))
               ]}
-              className="h-11 min-w-[150px]"
+              className="min-w-[150px]"
             />
             {formatDate(task.due_date) ? (
               <Badge variant="secondary">Due: {formatDate(task.due_date)}</Badge>

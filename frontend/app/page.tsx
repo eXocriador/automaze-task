@@ -33,11 +33,12 @@ import { TaskFilters } from "@/components/filters/TaskFilters";
 
 const categoryOptions = ["Work", "Personal", "Home", "Study"];
 const sortOptions: { value: TaskSort; label: string }[] = [
-  { value: null, label: "Newest first" },
   { value: "priority_desc", label: "Priority ↓" },
   { value: "priority_asc", label: "Priority ↑" },
+  { value: "due_date_desc", label: "Due date ↓" },
   { value: "due_date_asc", label: "Due date ↑" },
-  { value: "due_date_desc", label: "Due date ↓" }
+  { value: null, label: "Created ↓" },
+  { value: "created_asc" as TaskSort, label: "Created ↑" }
 ];
 
 export default function HomePage() {
@@ -203,41 +204,25 @@ export default function HomePage() {
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100">
-      <div className="container py-12">
-        <div className="mx-auto flex max-w-[800px] flex-col gap-8">
+      <div className="container py-8">
+        <div className="mx-auto flex max-w-[900px] flex-col gap-5">
           <Card className="bg-gradient-to-r from-white to-slate-50">
-            <CardHeader className="gap-3 pb-5">
-              <div className="flex items-start justify-between">
+            <CardHeader className="pb-5">
+              <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <CardTitle className="text-3xl font-semibold text-slate-900">
                   Task manager
                 </CardTitle>
-                <Badge variant={isValidating ? "warning" : "success"}>
-                  {isValidating ? "Refreshing" : "Synced"}
-                </Badge>
-              </div>
-              <div className="flex items-center justify-between">
-                <CardDescription className="text-base text-slate-600">
-                  Next.js + FastAPI + SQLite
-                </CardDescription>
-                <Badge variant="secondary">
-                  {doneCount} / {total} done
-                </Badge>
+                <div className="flex flex-col items-end gap-2 md:flex-row md:items-center md:gap-3">
+                  <Badge variant={isValidating ? "warning" : "success"}>
+                    {isValidating ? "Refreshing" : "Synced"}
+                  </Badge>
+                  <Badge variant="secondary">
+                    {doneCount} / {total} done
+                  </Badge>
+                  <Button onClick={() => setIsModalOpen(true)}>Add task</Button>
+                </div>
               </div>
             </CardHeader>
-          </Card>
-
-          <Card>
-            <CardContent className="flex items-center justify-between p-5">
-              <div>
-                <p className="text-sm font-semibold text-slate-900">
-                  Add new task
-                </p>
-                <p className="text-xs text-slate-500">
-                  Category & due date are optional; priority 1–10.
-                </p>
-              </div>
-              <Button onClick={() => setIsModalOpen(true)}>Add task</Button>
-            </CardContent>
           </Card>
 
           <Card>

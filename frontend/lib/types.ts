@@ -4,6 +4,7 @@ export type TaskSort =
   | "priority_desc"
   | "due_date_asc"
   | "due_date_desc"
+  | "created_asc"
   | null;
 
 export type Task = {

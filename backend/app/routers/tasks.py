@@ -10,7 +10,13 @@ router = APIRouter(prefix="/tasks", tags=["tasks"])
 
 
 StatusFilter = Literal["all", "done", "undone"]
-SortOption = Literal["priority_asc", "priority_desc", "due_date_asc", "due_date_desc"]
+SortOption = Literal[
+    "priority_asc",
+    "priority_desc",
+    "due_date_asc",
+    "due_date_desc",
+    "created_asc",
+]
 
 
 @router.get(
