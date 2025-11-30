@@ -56,3 +56,12 @@ export async function deleteTask(id: number): Promise<void> {
     throw new Error(detail);
   }
 }
+
+export async function reorderTasks(order: number[]): Promise<Task[]> {
+  const response = await fetch(`${baseUrl}/reorder`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(order)
+  });
+  return handleResponse<Task[]>(response);
+}

@@ -84,3 +84,12 @@ router.add_api_route(
     summary="Create a new task",
     include_in_schema=False,
 )
+
+
+@router.post(
+    "/reorder",
+    response_model=List[schemas.Task],
+    summary="Reorder tasks by IDs (drag-and-drop)",
+)
+def reorder_tasks(order: List[int], db: Session = Depends(get_db)) -> List[schemas.Task]:
+    return crud.reorder_tasks(db, order)

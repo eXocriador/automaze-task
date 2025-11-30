@@ -17,11 +17,29 @@ type Props = {
   task: Task;
   onToggle: (task: Task) => Promise<void>;
   onDelete: (task: Task) => Promise<void>;
+  draggable?: boolean;
+  onDragStart?: () => void;
+  onDragOver?: (e: React.DragEvent<HTMLDivElement>) => void;
+  onDrop?: () => void;
 };
 
-export function TaskItem({ task, onToggle, onDelete }: Props) {
+export function TaskItem({
+  task,
+  onToggle,
+  onDelete,
+  draggable = false,
+  onDragStart,
+  onDragOver,
+  onDrop
+}: Props) {
   return (
-    <Card>
+    <Card
+      draggable={draggable}
+      onDragStart={onDragStart}
+      onDragOver={onDragOver}
+      onDrop={onDrop}
+      className={draggable ? "cursor-move" : undefined}
+    >
       <CardContent className="flex items-start gap-3 p-4">
         <div className="flex flex-1 flex-col gap-2">
           <div className="flex items-start gap-2">

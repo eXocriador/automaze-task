@@ -14,7 +14,13 @@ import {
   CardHeader,
   CardTitle
 } from "@/components/ui/card";
-import { createTask, deleteTask, fetchTasks, updateTask } from "@/lib/api";
+import {
+  createTask,
+  deleteTask,
+  fetchTasks,
+  reorderTasks,
+  updateTask
+} from "@/lib/api";
 import { Task, TaskCreateInput, TaskSort, TaskStatus } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -113,6 +119,21 @@ export default function HomePage() {
     );
   };
 
+  const handleReorder = async (orderIds: number[], optimistic?: Task[]) => {
+    await mutate(
+      async () => {
+        const updated = await reorderTasks(orderIds);
+        return updated;
+      },
+      {
+        optimisticData: optimistic ?? tasks,
+        rollbackOnError: true,
+        revalidate: true,
+        populateCache: true
+      }
+    );
+  };
+
   return (
     <main className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100">
       <div className="container py-12">
@@ -196,6 +217,7 @@ export default function HomePage() {
             isLoading={isLoading}
             onToggle={handleToggle}
             onDelete={handleDelete}
+            onReorder={handleReorder}
           />
         </div>
       </div>

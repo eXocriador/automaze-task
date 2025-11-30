@@ -22,6 +22,7 @@ class Task(Base):
     category = Column(String(100), nullable=True, index=True)
     priority = Column(Integer, nullable=False, default=1)
     due_date = Column(DateTime(timezone=True), nullable=True, index=True)
+    order_index = Column(Integer, nullable=True, index=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
     __table_args__ = (

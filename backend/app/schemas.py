@@ -10,6 +10,7 @@ class TaskBase(BaseModel):
     priority: int = Field(default=1, ge=1, le=10)
     category: Optional[str] = Field(default=None, max_length=100)
     due_date: Optional[datetime] = None
+    order_index: Optional[int] = None
 
 
 class TaskCreate(TaskBase):
