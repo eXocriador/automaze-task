@@ -16,6 +16,7 @@ SortOption = Literal[
     "due_date_asc",
     "due_date_desc",
     "created_asc",
+    "created_desc",
 ]
 
 

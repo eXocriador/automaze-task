@@ -34,7 +34,7 @@ export function TaskFilters({
         placeholder="Search..."
         value={search}
         onChange={(e) => onSearchChange(e.target.value)}
-        className="flex-1 h-10 rounded-md border border-slate-200 px-4 text-sm font-medium outline-none transition hover:border-slate-300 focus:border-slate-400"
+        className="flex-1 h-11 rounded-md border border-slate-200 px-4 text-sm font-medium outline-none transition hover:border-slate-300 focus:border-slate-400"
       />
       <div className="flex w-full max-w-[480px] flex-none justify-end gap-3 md:w-auto">
         <Select

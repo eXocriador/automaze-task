@@ -46,6 +46,8 @@ def list_tasks(
         stmt = stmt.order_by(models.Task.due_date.is_(None), models.Task.due_date.desc(), models.Task.id.desc())
     elif sort == "created_asc":
         stmt = stmt.order_by(models.Task.created_at.asc(), models.Task.id.asc())
+    elif sort == "created_desc":
+        stmt = stmt.order_by(models.Task.created_at.desc(), models.Task.id.desc())
     else:
         stmt = stmt.order_by(
             models.Task.order_index.asc().nulls_last(), models.Task.created_at.desc(), models.Task.id.desc()

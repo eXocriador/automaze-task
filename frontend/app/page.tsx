@@ -37,8 +37,8 @@ const sortOptions: { value: TaskSort; label: string }[] = [
   { value: "priority_asc", label: "Priority ↑" },
   { value: "due_date_desc", label: "Due date ↓" },
   { value: "due_date_asc", label: "Due date ↑" },
-  { value: null, label: "Created ↓" },
-  { value: "created_asc" as TaskSort, label: "Created ↑" }
+  { value: "created_desc", label: "Created ↓" },
+  { value: "created_asc", label: "Created ↑" }
 ];
 
 export default function HomePage() {
@@ -209,17 +209,19 @@ export default function HomePage() {
           <Card className="bg-gradient-to-r from-white to-slate-50">
             <CardHeader className="pb-4">
               <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                <div className="flex items-center justify-between gap-3 md:flex-col md:items-start md:gap-1">
-                  <CardTitle className="text-2xl font-semibold text-slate-900 md:text-3xl">
-                    Task manager
-                  </CardTitle>
-                  <div className="flex items-center gap-2 md:hidden">
-                    <Badge variant={isValidating ? "warning" : "success"}>
-                      {isValidating ? "Refreshing" : "Synced"}
-                    </Badge>
-                    <Badge variant="secondary">
-                      {doneCount} / {total} done
-                    </Badge>
+                <div className="flex items-start justify-between gap-3 md:flex-col md:items-start md:gap-1">
+                  <div className="flex items-center gap-3">
+                    <CardTitle className="text-2xl font-semibold text-slate-900 md:text-3xl">
+                      Task manager
+                    </CardTitle>
+                    <div className="flex items-center gap-2 md:hidden">
+                      <Badge variant={isValidating ? "warning" : "success"}>
+                        {isValidating ? "Refreshing" : "Synced"}
+                      </Badge>
+                      <Badge variant="secondary">
+                        {doneCount} / {total} done
+                      </Badge>
+                    </div>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 md:gap-3">

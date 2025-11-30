@@ -5,6 +5,7 @@ export type TaskSort =
   | "due_date_asc"
   | "due_date_desc"
   | "created_asc"
+  | "created_desc"
   | null;
 
 export type Task = {
